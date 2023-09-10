@@ -4,6 +4,8 @@ import Questionnaires from '../screens/Questionnaires'
 import { BottomNavigation, Text } from 'react-native-paper';
 import Questionnaire from '../screens/Questionnaire';
 import { createStackNavigator } from '@react-navigation/stack';
+import Account from '../screens/Account';
+import ChangePassword from '../screens/ChangePassword';
 
 const Stack = createStackNavigator();
 
@@ -11,12 +13,13 @@ const QuestionRoute = () => {
     return (
         <Stack.Navigator initialRouteName='questionnaires' screenOptions={{headerShown: false}}>
             <Stack.Screen name="questionnaires" component={Questionnaires} />
-            <Stack.Screen name="questionDetail" component={Questionnaire} />        
+            <Stack.Screen name="questionDetail" component={Questionnaire} />            
+            <Stack.Screen name="changePassword" component={ChangePassword} /> 
         </Stack.Navigator>
     )
 }
 
-const AccountRoute = () => <Text>Notifications</Text>;
+const AccountRoute = () => <Account />
 
 const AppFooter = () => {
     const [index, setIndex] = React.useState(0);
