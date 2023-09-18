@@ -1,0 +1,44 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres_container
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${DB_PORT}:${DB_PORT}"
+    restart: always
+
+  # nodeapp:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: node_app_container 
+  #   environment:
+  #     DB_HOST: ${DB_HOST}
+  #     DB_DATABASE: ${DB_DATABASE}
+  #     DB_USER: ${DB_USER}
+  #     DB_PASSWORD: ${DB_PASSWORD}
+  #     DB_PORT: ${DB_PORT}
+  #     DB_DIALECT: ${DB_DIALECT}
+  #     APP_HOST: ${APP_HOST}
+  #     APP_PORT: ${APP_PORT}
+  #   ports:
+  #     - "${APP_PORT}:${APP_PORT}"    
+  #   volumes:      
+  #     - ./src:/app/src     
+  #   command: npm run start
+  #   restart: always
+
+
+
+networks:
+  default:
+      name: mynetwork
+
+volumes:
+  postgres_data:
