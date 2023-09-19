@@ -82,6 +82,11 @@ app.get('/questionnaires/:id', async (req, res) => {
   })
 });
 app.post('/questionnaires/create', async (req, res) => {
+  if(!req.user?.isAdmin) {
+    return res.status(403).json({
+      error: 'Forbidden'
+    })
+  }
   const createPayload = {
     title: req.body.title,
     description: req.body.description,
@@ -101,6 +106,12 @@ app.post('/questionnaires/create', async (req, res) => {
   })
 });
 app.post('/questionnaires/update/:id', async (req, res) => {
+  if(!req.user?.isAdmin) {
+    return res.status(403).json({
+      error: 'Forbidden'
+    })
+  }
+  
   const questionnaireId = req.params?.id
   const updatePayload = {
     ...req.body,

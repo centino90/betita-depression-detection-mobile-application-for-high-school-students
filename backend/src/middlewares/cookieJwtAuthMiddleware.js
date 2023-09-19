@@ -10,7 +10,6 @@ export function verifyCookieJwtAuth() {
         try {
             const user = jwt.verify(raw, process.env.AUTH_TOKEN_SECRET);            
             req.user = user;
-            console.log('dd', token)
             return await next()
         } catch (err) {            
             return res.status(403).json({

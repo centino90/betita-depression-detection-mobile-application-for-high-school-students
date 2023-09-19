@@ -10,17 +10,28 @@ module.exports = {
         password: await bcrypt.hash('password', 10),
         age: 15,
         gender: 'Male',
+        isAdmin: false,
         createdAt: new Date(),
         updatedAt: new Date()
       },
       {      
         email: 'student2@test.com',
-        password: await bcrypt.hash('password2', 10),
+        password: await bcrypt.hash('password', 10),
         age: 16,
         gender: 'Female',
+        isAdmin: false,
         createdAt: new Date(),
         updatedAt: new Date()
-      }      
+      },
+      {      
+        email: 'admin@test.com',
+        password: await bcrypt.hash('password', 10),
+        age: 20,
+        gender: 'Male',
+        isAdmin: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
   ]);
   },
 
