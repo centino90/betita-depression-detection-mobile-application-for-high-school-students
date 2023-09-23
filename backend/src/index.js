@@ -128,6 +128,59 @@ app.post('/questionnaires/update/:id', async (req, res) => {
     data: {}
   })
 });
+app.post('/questionnaires/archive/:id', async (req, res) => {
+  if(!req.user?.isAdmin) {
+    return res.status(403).json({
+      error: 'Forbidden'
+    })
+  }
+  
+  const questionnaireId = req.params?.id
+  const archivePayload = {
+    archivedAt: new Date(),
+    updatedAt: new Date()
+  }
+  const archiveQuestionnaire = await _db(req)('Questionnaires').update({ ...archivePayload }, ['id']).where('id', questionnaireId)
+  if (archiveQuestionnaire.rowCount <= 0) {
+    return res.status(400).json({
+      error: 'Archival of questionnaire failed'
+    })
+  }
+  return res.status(200).json({
+    message: 'Questionnaire Archival Successful',
+    data: {}
+  })
+});
+app.post('/questionnaires/restore/:id', async (req, res) => {
+  if(!req.user?.isAdmin) {
+    return res.status(403).json({
+      error: 'Forbidden'
+    })
+  }
+  
+  const questionnaireId = req.params?.id
+  const restorePayload = {
+    archivedAt: null,
+    updatedAt: new Date()
+  }
+  // check: only one restored questionnaire should exist
+  const restoredQuestionnaires = await _db(req)('Questionnaires').select('id').whereNull('archivedAt')
+  if(restoredQuestionnaires.length > 0) {
+    return res.status(400).json({
+      error: 'A restored questionnaire already exist. Only one restored questionnaire should exist'
+    })
+  }  
+  const restoreQuestionnaire = await _db(req)('Questionnaires').update({ ...restorePayload }, ['id']).where('id', questionnaireId)
+  if (restoreQuestionnaire.rowCount <= 0) {
+    return res.status(400).json({
+      error: 'Restoration of questionnaire failed'
+    })
+  }
+  return res.status(200).json({
+    message: 'Questionnaire Restoration Successful',
+    data: {}
+  })
+});
 app.get('/answers', async (req, res) => {
   const answers = await _db(req).select('id', 'userId', 'questionnaireId', 'answers', 'createdAt', 'updatedAt').from('UserQuestionnaires')
   return res.status(200).json({
