@@ -11,12 +11,12 @@ const Questionnaire = ({ navigation, ...props }) => {
       {
         key: 'description',
         icon: 'comment-text-outline',
-        value: params.description,
+        value: params?.description,
       },
       {
         key: 'createdAt',
         icon: 'clock-edit-outline',
-        value: `Created on ${params.createTimestamp}`
+        value: `Created on ${params?.createTimestamp}`
       }    
   ]
   const questions = [
