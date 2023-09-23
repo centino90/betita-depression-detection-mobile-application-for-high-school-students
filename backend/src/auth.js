@@ -21,7 +21,6 @@ export async function fetchUser(email, pwd, db) {
     if (!fetchedUser[0]) {
         return false
     }
-    const {password, ...userProps} = fetchedUser[0]
-
-    return verifyPassword(pwd, fetchedUser[0]?.password) ? userProps : false;
+    const {password, ...userProps} = fetchedUser[0]    
+    return await verifyPassword(pwd, fetchedUser[0]?.password) === true ? userProps : false;
 }

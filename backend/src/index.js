@@ -29,11 +29,11 @@ app.post('/auth', async (req, res) => {
 
   const user = await fetchUser(req.body.email, req.body.password, db)
   if (!user) {
-    res.status(400).json({
+    return res.status(400).json({
       error: "Invalid email or password"
     })
   }
-
+  console.log({user})
   const accessToken = jwt.sign(user, process.env.AUTH_TOKEN_SECRET, { expiresIn: process.env.AUTH_ACCESS_TOKEN_EXPIRATION });
   const refreshToken = jwt.sign(user, process.env.AUTH_TOKEN_SECRET, { expiresIn: process.env.AUTH_REFRESH_TOKEN_EXPIRATION });  
   return res
