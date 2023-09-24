@@ -33,34 +33,34 @@ app.post('/auth', async (req, res) => {
       error: "Invalid email or password"
     })
   }
-  console.log({user})
+  console.log({ user })
   const accessToken = jwt.sign(user, process.env.AUTH_TOKEN_SECRET, { expiresIn: process.env.AUTH_ACCESS_TOKEN_EXPIRATION });
-  const refreshToken = jwt.sign(user, process.env.AUTH_TOKEN_SECRET, { expiresIn: process.env.AUTH_REFRESH_TOKEN_EXPIRATION });  
+  const refreshToken = jwt.sign(user, process.env.AUTH_TOKEN_SECRET, { expiresIn: process.env.AUTH_REFRESH_TOKEN_EXPIRATION });
   return res
-  .status(200)  
-  .cookie('refreshToken', refreshToken, { httpOnly: true, sameSite: 'strict' })
-  .header('Authorization', accessToken)
-  .send({
-    message: 'Login Successful',
-    data: user
-  })
+    .status(200)
+    .cookie('refreshToken', refreshToken, { httpOnly: true, sameSite: 'strict' })
+    .header('Authorization', accessToken)
+    .send({
+      message: 'Login Successful',
+      data: user
+    })
 });
 app.use(verifyCookieJwtAuth())
 
-app.post('/auth/refresh', async(req, res) => {
+app.post('/auth/refresh', async (req, res) => {
   const refreshToken = req.cookies['refreshToken'];
   if (!refreshToken) {
     return res.status(401).send('Access Denied. No refresh token provided.');
   }
 
   try {
-    const {exp, ...user} = jwt.verify(refreshToken, process.env.AUTH_TOKEN_SECRET);
+    const { exp, ...user } = jwt.verify(refreshToken, process.env.AUTH_TOKEN_SECRET);
     const accessToken = jwt.sign(user, process.env.AUTH_TOKEN_SECRET, { expiresIn: process.env.AUTH_ACCESS_TOKEN_EXPIRATION });
     return res
       .header('Authorization', accessToken)
       .send({
         message: 'Access Token Refreshed Sucessfuly',
-        data: {exp, ...user}
+        data: { exp, ...user }
       });
   } catch (error) {
     return res.status(400).send('Invalid refresh token.');
@@ -73,16 +73,37 @@ app.get('/questionnaires', async (req, res) => {
     data: questionniares.length > 0 ? questionniares : []
   })
 });
+app.get('/questionnaires/available', async (req, res) => {
+  const questionniare = (await _db(req).select('id', 'title', 'description', 'questions', 'createdAt', 'updatedAt', 'archivedAt').from('Questionnaires').whereNull('archivedAt'))[0]
+  if (questionniare?.id) {
+    const answeredQuestionniare = (await _db(req).select('id', 'userId', 'questionnaireId', 'answers').from('UserQuestionnaires').where('userId', req.user?.id).andWhere('questionnaireId', questionniare.id))[0]
+    if (answeredQuestionniare?.id) {
+      questionniare.isAnsweredByCurrentUser = true
+      questionniare.currentUserAnswer = answeredQuestionniare.answers
+    }
+  }
+  return res.status(200).json({
+    message: 'Available Questionnaire Fetching Successful',
+    data: questionniare
+  })
+});
 app.get('/questionnaires/:id', async (req, res) => {
   const questionnaireId = req.params?.id
   const questionniare = (await _db(req).select('id', 'title', 'description', 'questions', 'createdAt', 'updatedAt', 'archivedAt').from('Questionnaires').where('id', questionnaireId))[0]
+  if (questionniare?.id) {
+    const answeredQuestionniare = (await _db(req).select('id', 'userId', 'questionnaireId', 'answers').from('UserQuestionnaires').where('userId', req.user?.id).andWhere('questionnaireId', questionniare.id))[0]
+    if (answeredQuestionniare?.id) {
+      questionniare.isAnsweredByCurrentUser = true
+    }
+  }
+
   return res.status(200).json({
     message: 'Questionnaire Fetching Successful',
     data: questionniare ?? {}
   })
 });
 app.post('/questionnaires/create', async (req, res) => {
-  if(!req.user?.isAdmin) {
+  if (!req.user?.isAdmin) {
     return res.status(403).json({
       error: 'Forbidden'
     })
@@ -106,12 +127,12 @@ app.post('/questionnaires/create', async (req, res) => {
   })
 });
 app.post('/questionnaires/update/:id', async (req, res) => {
-  if(!req.user?.isAdmin) {
+  if (!req.user?.isAdmin) {
     return res.status(403).json({
       error: 'Forbidden'
     })
   }
-  
+
   const questionnaireId = req.params?.id
   const updatePayload = {
     ...req.body,
@@ -129,12 +150,12 @@ app.post('/questionnaires/update/:id', async (req, res) => {
   })
 });
 app.post('/questionnaires/archive/:id', async (req, res) => {
-  if(!req.user?.isAdmin) {
+  if (!req.user?.isAdmin) {
     return res.status(403).json({
       error: 'Forbidden'
     })
   }
-  
+
   const questionnaireId = req.params?.id
   const archivePayload = {
     archivedAt: new Date(),
@@ -152,12 +173,12 @@ app.post('/questionnaires/archive/:id', async (req, res) => {
   })
 });
 app.post('/questionnaires/restore/:id', async (req, res) => {
-  if(!req.user?.isAdmin) {
+  if (!req.user?.isAdmin) {
     return res.status(403).json({
       error: 'Forbidden'
     })
   }
-  
+
   const questionnaireId = req.params?.id
   const restorePayload = {
     archivedAt: null,
@@ -165,11 +186,11 @@ app.post('/questionnaires/restore/:id', async (req, res) => {
   }
   // check: only one restored questionnaire should exist
   const restoredQuestionnaires = await _db(req)('Questionnaires').select('id').whereNull('archivedAt')
-  if(restoredQuestionnaires.length > 0) {
+  if (restoredQuestionnaires.length > 0) {
     return res.status(400).json({
       error: 'A restored questionnaire already exist. Only one restored questionnaire should exist'
     })
-  }  
+  }
   const restoreQuestionnaire = await _db(req)('Questionnaires').update({ ...restorePayload }, ['id']).where('id', questionnaireId)
   if (restoreQuestionnaire.rowCount <= 0) {
     return res.status(400).json({
