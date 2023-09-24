@@ -18,7 +18,7 @@ const AppMenu = ({ isMenuVisible, setMenuVisiblity, navigation }) => {
         visible={isMenuVisible}
         onDismiss={closeMenu}
         anchor={<Button style={{padding: 0, margin: 0, height: 1, maxHeight: 1}}></Button>}>
-        <Menu.Item leadingIcon={'account-key'} onPress={() => navigation.navigate('Change Password')} title="Change Password" />
+        <Menu.Item leadingIcon={'account-key'} onPress={() => navigation.navigate('ChangePassword')} title="Change Password" />
         <Menu.Item leadingIcon={'logout'} onPress={() => handleSignOut(navigation)} title="Sign Out" />
       </Menu>
     </View>

@@ -33,7 +33,7 @@ const QuestionnaireQuestionList = ({subheader='', iconColor=MD3Colors.secondary4
     return (
         <List.Section>
             <List.Subheader style={{color: iconColor, fontWeight: fontWeight}}>{subheader}</List.Subheader>
-            <Text style={{color: titleColor, marginBottom: 8}}>Please give your honest rating to each item in the list</Text>
+            <Text style={{color: titleColor, marginBottom: 30}}>Please give your honest rating to each item in the list</Text>
             <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly', flexWrap: 'wrap', marginBottom: 10}}>
                 <Text>0 - Not at all</Text>
                 <Text>1 - A few days</Text>

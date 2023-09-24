@@ -10,6 +10,7 @@ const AppActionMessage = ({message = '', visibleActionMessage, memoizedHandleVis
     <View style={styles.container}>
       <Button onPress={onToggleSnackBar}></Button>
       <Snackbar
+        duration={1000}
         visible={visibleActionMessage}
         onDismiss={onDismissSnackBar}
         action={{
