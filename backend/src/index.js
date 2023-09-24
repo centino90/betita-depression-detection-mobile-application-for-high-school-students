@@ -115,6 +115,13 @@ app.post('/questionnaires/create', async (req, res) => {
     createdAt: new Date(),
     updatedAt: new Date()
   }
+
+  // check: only one restored questionnaire should exist, if exists, archive the new creation
+  const restoredQuestionnaires = await _db(req)('Questionnaires').select('id').whereNull('archivedAt')
+  if (restoredQuestionnaires.length > 0) {
+    createPayload.archivedAt = new Date()
+  }
+
   const createQuestionnaire = await _db(req).insert(createPayload).into('Questionnaires')
   if (createQuestionnaire.rowCount <= 0) {
     return res.status(400).json({
