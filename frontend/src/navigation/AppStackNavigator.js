@@ -19,7 +19,7 @@ const AppStackNavigator  = () => {
             <Stack.Screen name="Login" component={Login}/>
             <Stack.Screen name="AdminDashboard" component={AdminDashboard} />
             <Stack.Screen name="StudentDashboard" component={StudentDashboard}/>
-            <Stack.Screen name="ChangePassword" component={ChangePassword}/>
+            {/* <Stack.Screen name="ChangePassword" component={ChangePassword}/> */}
             {/* <Stack.Screen name="StudentDashboardStackNavigator" /> */}
         </Stack.Navigator>
     )
