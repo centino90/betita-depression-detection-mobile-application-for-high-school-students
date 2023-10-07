@@ -31,6 +31,15 @@ module.exports = {
         type: Sequelize.BOOLEAN,
         defaultValue: false
       },
+      symptom: {
+        allowNull: true,
+        type: Sequelize.ENUM,
+        values: ['minimal', 'mild', 'moderate', 'moderately severe', 'severe']
+      },
+      answer: {        
+        type: Sequelize.ARRAY(Sequelize.INTEGER),
+        defaultValue: []
+      },      
       createdAt: { 
         allowNull: false,
         type: Sequelize.DATE

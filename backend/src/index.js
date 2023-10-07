@@ -9,9 +9,12 @@ import { fetchUser } from "./auth";
 import jwt from 'jsonwebtoken'
 import { verifyCookieJwtAuth } from "./middlewares/cookieJwtAuthMiddleware";
 import cookieParser from 'cookie-parser'
+import nodemailer from 'nodemailer';
+import Mailgen from 'mailgen';
+import cors from 'cors';
 dotenvSafe.config()
 
-const { APP_PORT, APP_HOST } = process.env
+const { APP_PORT, APP_HOST, MAIL_EMAIL, MAIL_USER, MAIL_PASSWORD } = process.env
 
 // Constants
 const PORT = APP_PORT ?? 8080;
@@ -21,6 +24,8 @@ const HOST = APP_HOST ?? '0.0.0.0';
 const app = express();
 
 app.use(helmet())
+app.use(cors())
+app.disable('x-powered-by')
 app.use(cookieParser())
 app.use(bodyParser.json({ type: 'application/json' }))
 app.use(dbMiddleware())
@@ -33,7 +38,7 @@ app.post('/auth', async (req, res) => {
       error: "Invalid email or password"
     })
   }
-  console.log({ user })
+
   const accessToken = jwt.sign(user, process.env.AUTH_TOKEN_SECRET, { expiresIn: process.env.AUTH_ACCESS_TOKEN_EXPIRATION });
   const refreshToken = jwt.sign(user, process.env.AUTH_TOKEN_SECRET, { expiresIn: process.env.AUTH_REFRESH_TOKEN_EXPIRATION });
   return res
@@ -55,12 +60,16 @@ app.post('/auth/refresh', async (req, res) => {
 
   try {
     const { exp, ...user } = jwt.verify(refreshToken, process.env.AUTH_TOKEN_SECRET);
-    const accessToken = jwt.sign(user, process.env.AUTH_TOKEN_SECRET, { expiresIn: process.env.AUTH_ACCESS_TOKEN_EXPIRATION });
+    const latestUserDetail = (await req.db
+      .select('id', 'email', 'password', 'age', 'gender', 'isAdmin', 'symptom', 'answer')
+      .from('Users')
+      .where('email', user.email))[0]
+    const accessToken = jwt.sign(latestUserDetail, process.env.AUTH_TOKEN_SECRET, { expiresIn: process.env.AUTH_ACCESS_TOKEN_EXPIRATION });
     return res
       .header('Authorization', accessToken)
       .send({
         message: 'Access Token Refreshed Sucessfuly',
-        data: { exp, ...user }
+        data: { exp, ...latestUserDetail }
       });
   } catch (error) {
     return res.status(400).send('Invalid refresh token.');
@@ -283,7 +292,118 @@ app.post('/answers/update/:id', async (req, res) => {
     data: {}
   })
 });
+app.get('/admin/students', async (req, res) => {
+  if (!req.user?.isAdmin) {
+    return res.status(403).json({
+      error: 'Forbidden'
+    })
+  }
 
+  const students = await _db(req).select('id', 'email', 'age', 'gender', 'isAdmin', 'symptom', 'answer').from('Users').whereNotNull('symptom').andWhereNot('symptom', 'minimal')
+  const mappedStudents = students.map(student => {
+    student.totalScore = student?.answer.reduce((acc, cur) => acc + cur, 0)
+    return student
+  })
+  const sortedStudent = mappedStudents.sort((prev, cur) => prev.totalScore + cur.totalScore)
+
+  return res.status(200).json({
+    message: 'Students Fetching Successful',
+    data: sortedStudent
+  })
+});
+app.get('/admin/student/:id', async (req, res) => {
+  if (!req.user?.isAdmin) {
+    return res.status(403).json({
+      error: 'Forbidden'
+    })
+  }
+
+  const student = (await _db(req).select('id', 'email', 'age', 'gender', 'isAdmin', 'symptom', 'answer').from('Users').where('id', req.params?.id ?? null))[0]
+
+  return res.status(200).json({
+    message: 'Student Fetching Successful',
+    data: student ?? {}
+  })
+});
+app.post('/student/saveAnswer', async (req, res) => {
+  const { answer = [] } = req.body
+
+  // map answer to PHQ symptom
+  let symptom = ''
+  const totalScore = answer.reduce((acc, cur) => acc + cur, 0)
+  if (totalScore === 0 || totalScore <= 4) symptom = 'minimal'
+  else if (totalScore === 5 || totalScore <= 9) symptom = 'mild'
+  else if (totalScore === 10 || totalScore <= 14) symptom = 'moderate'
+  else if (totalScore === 15 || totalScore <= 19) symptom = 'moderately severe'
+  else if (totalScore === 20 || totalScore <= 27) symptom = 'severe'
+
+  const payload = {
+    answer,
+    symptom,
+    updatedAt: new Date()
+  }
+
+  const saveAnswer = await _db(req)('Users').update({ ...payload }, ['id']).where('id', req?.user?.id ?? null)
+
+  return res.status(200).json({
+    message: 'Save Answer Successful',
+    data: saveAnswer ?? null
+  })
+});
+app.post('/admin/student/notifyForCounseling/:id', async (req, res) => {
+  if (!req.user?.isAdmin) {
+    return res.status(403).json({
+      error: 'Forbidden'
+    })
+  }
+
+  const student = (await _db(req).select('id', 'email', 'age', 'gender', 'isAdmin', 'symptom', 'answer').from('Users').where('id', req.params?.id ?? null))[0]
+
+  const transporter = nodemailer.createTransport({
+    host: 'smtp.mailtrap.io',
+    port: 2525,
+    auth: {
+      user: MAIL_USER, // generated mailtrap user
+      pass: MAIL_PASSWORD, // generated mailtrap password
+    }
+  })
+
+  const MailGenerator = new Mailgen({
+    theme: "default",
+    product: {
+      name: "Depression Counseling",
+      link: '#'
+    }
+  })
+
+  const email = {
+    body: {      
+      signature: ' ',
+      name: 'Student',
+      intro: 'You are being notified for your counseling after you submitted your PHQ-9 depression questionnaire. Please go the school counselor\'s office within this week',
+      outro: 'If you have further inquiries, you can contact your administrator.'
+    }
+  }
+  const emailBody = MailGenerator.generate(email);
+  // send mail with defined transport object
+  const mailOptions = {
+    from: req.user.email,
+    to: student.email,
+    subject: 'Depression Counseling',
+    html: emailBody
+  };
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.log(error);
+      res.status(500).send('Error sending email');
+    } else {
+      console.log('Email sent: ' + info.response);
+      return res.status(200).json({
+        message: 'Counseling notification sent successfully'
+      })
+    }
+  })
+})
 
 app.listen(PORT, HOST, () => {
   console.log(`Running on http://${HOST}:${PORT}`);

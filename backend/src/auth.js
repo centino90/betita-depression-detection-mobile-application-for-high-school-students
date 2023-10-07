@@ -14,7 +14,7 @@ async function verifyPassword(password, hash) {
 
 export async function fetchUser(email, pwd, db) {
     const fetchedUser = await db
-        .select('id', 'email', 'password', 'age', 'gender', 'isAdmin')
+        .select('id', 'email', 'password', 'age', 'gender', 'isAdmin', 'symptom', 'answer')
         .from('Users')
         .where('email', email)
 
