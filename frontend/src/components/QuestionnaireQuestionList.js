@@ -31,9 +31,12 @@ const AnswerSectionComponent = ({answer, sendAnswersToParent, index}) => {
 
 const QuestionnaireQuestionList = ({subheader='', iconColor=MD3Colors.secondary40, titleColor=MD3Colors.secondary40, fontWeight = '700', listItems = [], answers = [], sendAnswersToParent}) => {    
     return (
-        <List.Section>
-            <List.Subheader style={{color: iconColor, fontWeight: fontWeight}}>{subheader}</List.Subheader>
-            <Text style={{color: titleColor, marginBottom: 30}}>Please give your honest rating to each item in the list</Text>
+        <List.Section>            
+            <Text style={{color: iconColor, fontWeight: fontWeight, padding: 0, marginBottom: 2}}>{subheader}</Text>
+            <Text style={{color: titleColor, marginBottom: 30}}>
+                How Often Have You Had These Symptoms Over the Past 2 Weeks, Including Today?
+                Please give your honest rating to each item in the list
+            </Text>
             <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly', flexWrap: 'wrap', marginBottom: 10}}>
                 <Text>0 - Not at all</Text>
                 <Text>1 - A few days</Text>

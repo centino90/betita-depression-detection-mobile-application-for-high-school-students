@@ -3,6 +3,7 @@ import { View, Text, SafeAreaView, StyleSheet, ScrollView, BackHandler } from 'r
 import AppHeader from '../components/AppHeader'
 import storage from '../storage'
 import AppContainer from '../components/AppContainer'
+import AdminDepressedStudentsPage from '../components/AdminDepressedStudentsPage'
 
 const AdminDashboard = ({ navigation }) => {
     React.useEffect(() => {
@@ -16,12 +17,6 @@ const AdminDashboard = ({ navigation }) => {
         }
     }, [])
 
-
-    const {
-        wrapper,
-        container,
-    } = styles
-
     const HeaderProps = {
         HeaderTitle: 'Admin Dashboard',
         isNestedPage: false
@@ -32,21 +27,25 @@ const AdminDashboard = ({ navigation }) => {
         navigation: navigation
     }
 
+    const ContentProps = {
+        questionnaire: {}
+    }
+
+    const MessageProps = {
+        message: 'Answers are successfully saved',
+        // visibleActionMessage,
+        // memoizedHandleVisibleActionMessage
+    }
 
     return (
-        <AppContainer HeaderProps={HeaderProps} NavigationProps={NavigationProps}
-            AppContent={() => <Text>Admin</Text>}
+        <AppContainer 
+            HeaderProps={HeaderProps} 
+            NavigationProps={NavigationProps} 
+            ContentProps={ContentProps} 
+            MessageProps={MessageProps}
+            AppContent={() => <AdminDepressedStudentsPage /> }
         />
     )
 }
 
-const styles = StyleSheet.create({
-    wrapper: {
-        flex: 1
-    },
-    container: {
-        flex: 1,
-        padding: 10
-    }
-})
 export default AdminDashboard

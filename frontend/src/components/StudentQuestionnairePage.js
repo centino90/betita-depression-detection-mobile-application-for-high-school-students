@@ -37,8 +37,7 @@ const DisplayAnsweredQuestionnaire = ({questionnaire, memoizedHandleQuestionnair
         setEditState(state)
     }
     const memoizedHandleEditState = React.useCallback(handleEditState, [editState]);
-
-    console.log({editState})
+    
     if(editState === true || questionnaire && questionnaire?.isAnsweredByCurrentUser === undefined) {
         return <DisplayQuestionnaire questionnaire={questionnaire} setEditState={memoizedHandleEditState} memoizedHandleQuestionnaireTemplate={memoizedHandleQuestionnaireTemplate} memoizedHandleVisibleActionMessage={memoizedHandleVisibleActionMessage}/>
     } else if(editState === false && questionnaire && questionnaire?.isAnsweredByCurrentUser === true) {
@@ -79,7 +78,11 @@ const DisplayQuestionnaire = ({ questionnaire, setEditState, memoizedHandleQuest
         row.id = index + 1
         row.question = r
         return row
-    })    
+    })
+    
+    const _questions = [
+        
+    ]
     
     const [childAnswers, setChildAnswers] = React.useState(questions?.map((item, index) => {
         if(questionnaire?.currentUserAnswer?.length > 0) {
@@ -102,8 +105,7 @@ const DisplayQuestionnaire = ({ questionnaire, setEditState, memoizedHandleQuest
     }
 
     const handleAnswersSubmit = () => {
-        if(questionnaire?.currentUserAnswer?.length > 0) {  
-            console.log('update')
+        if(questionnaire?.currentUserAnswer?.length > 0) {              
             console.log({childAnswers})
             submitAnswersHook({URL: `${BACKEND_URL}/answers/update/${questionnaire.id}`, payload: {answers: childAnswers}}).then(res => {
                 memoizedHandleQuestionnaireTemplate({...questionnaire, answers: childAnswers})
@@ -112,8 +114,7 @@ const DisplayQuestionnaire = ({ questionnaire, setEditState, memoizedHandleQuest
                 // setEditState(false)
                 // setVisibleActionMessage(true)
             })
-        } else {
-            console.log('create')
+        } else {            
             submitAnswersHook({URL: `${BACKEND_URL}/answers/create`, payload: {
                 questionnaireId: questionnaire.id,
                 answers: childAnswers

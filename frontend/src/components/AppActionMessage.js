@@ -5,7 +5,9 @@ import { Button, Snackbar } from 'react-native-paper';
 const AppActionMessage = ({message = '', visibleActionMessage, memoizedHandleVisibleActionMessage}) => {
   const onToggleSnackBar = () => memoizedHandleVisibleActionMessage(!visibleActionMessage);
   const onDismissSnackBar = () => memoizedHandleVisibleActionMessage(false);
-
+  if(!visibleActionMessage) {
+    return <></>
+  }
   return (
     <View style={styles.container}>
       <Button onPress={onToggleSnackBar}></Button>

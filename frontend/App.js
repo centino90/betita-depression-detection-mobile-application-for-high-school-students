@@ -18,7 +18,13 @@ import AppStackNavigator from './src/navigation/AppStackNavigator'
 
 // const Tab = createBottomTabNavigator();
 // const Stack = createStackNavigator();
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
+    }
+  }
+})
 
 const App = () => {
   return (
