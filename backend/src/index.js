@@ -29,6 +29,45 @@ app.disable('x-powered-by')
 app.use(cookieParser())
 app.use(bodyParser.json({ type: 'application/json' }))
 app.use(dbMiddleware())
+app.get('/notify/confirm/:id', async (req, res) => {
+  const userId = req.params?.id ?? null
+  const userEmail = req.query?.email ?? null
+
+  const notifiableUser = (await req.db
+    .select('id', 'email', 'isNotified')
+    .from('Users')
+    .where('email', userEmail)
+    .andWhere('id', userId))[0]
+
+  if (!notifiableUser) {
+    return res.status(404).format({
+      'text/html': function(){
+        res.send('<p>Request failed. Your email confirmation was not found</p>')
+      }
+    })    
+  }
+
+  if(notifiableUser && !notifiableUser.isNotified) {
+    return res.status(400).format({
+      'text/html': function(){
+        res.send('<p>Request failed. You already confirmed this email once</p>')
+      }
+    })
+  }
+  
+  const updatePayload = {
+    isNotified: false,
+    isNotificationConfirmed: true,
+    updatedAt: new Date()
+  }
+
+  const notifiedUser = await _db(req)('Users').update({ ...updatePayload }, ['id']).where('id', notifiableUser.id)  
+  return res.status(200).format({
+    'text/html': function(){
+      res.send('<p>Your email confirmation is successful. See you in the consultation office!</p>')
+    }
+  })
+});
 app.post('/auth', async (req, res) => {
   const db = req.db
 
@@ -299,12 +338,12 @@ app.get('/admin/students', async (req, res) => {
     })
   }
 
-  const students = await _db(req).select('id', 'email', 'age', 'gender', 'isAdmin', 'symptom', 'answer').from('Users').whereNotNull('symptom').andWhereNot('symptom', 'minimal')
+  const students = await _db(req).select('id', 'email', 'age', 'gender', 'isAdmin', 'symptom', 'answer', 'isNotified', 'isNotificationConfirmed').from('Users').whereNotNull('symptom').andWhereNot('symptom', 'minimal')
   const mappedStudents = students.map(student => {
     student.totalScore = student?.answer.reduce((acc, cur) => acc + cur, 0)
     return student
   })
-  const sortedStudent = mappedStudents.sort((prev, cur) => prev.totalScore + cur.totalScore)
+  const sortedStudent = mappedStudents.sort((prev, cur) => cur.totalScore - prev.totalScore)
 
   return res.status(200).json({
     message: 'Students Fetching Successful',
@@ -318,7 +357,7 @@ app.get('/admin/student/:id', async (req, res) => {
     })
   }
 
-  const student = (await _db(req).select('id', 'email', 'age', 'gender', 'isAdmin', 'symptom', 'answer').from('Users').where('id', req.params?.id ?? null))[0]
+  const student = (await _db(req).select('id', 'email', 'age', 'gender', 'isAdmin', 'symptom', 'answer', 'isNotified').from('Users').where('id', req.params?.id ?? null))[0]
 
   return res.status(200).json({
     message: 'Student Fetching Successful',
@@ -357,7 +396,7 @@ app.post('/admin/student/notifyForCounseling/:id', async (req, res) => {
     })
   }
 
-  const student = (await _db(req).select('id', 'email', 'age', 'gender', 'isAdmin', 'symptom', 'answer').from('Users').where('id', req.params?.id ?? null))[0]
+  const student = (await _db(req).select('id', 'email', 'age', 'gender', 'isAdmin', 'symptom', 'answer', 'isNotified').from('Users').where('id', req.params?.id ?? null))[0]
 
   const transporter = nodemailer.createTransport({
     host: 'smtp.mailtrap.io',
@@ -381,7 +420,15 @@ app.post('/admin/student/notifyForCounseling/:id', async (req, res) => {
       signature: ' ',
       name: 'Student',
       intro: 'You are being notified for your counseling after you submitted your PHQ-9 depression questionnaire. Please go the school counselor\'s office within this week',
-      outro: 'If you have further inquiries, you can contact your administrator.'
+      outro: 'If you have further inquiries, you can contact your administrator.',
+      action: {
+        instructions: 'To confirm that you received and agree to the scheduled consultation, please click here:',
+        button: {
+            color: '#22BC66', // Optional action button color
+            text: 'Confirm',
+            link: `http://localhost:${PORT}/notify/confirm/${student.id}?email=${student.email}`
+        }
+    },
     }
   }
   const emailBody = MailGenerator.generate(email);
@@ -392,12 +439,19 @@ app.post('/admin/student/notifyForCounseling/:id', async (req, res) => {
     subject: 'Depression Counseling',
     html: emailBody
   };
-  transporter.sendMail(mailOptions, (error, info) => {
+  await transporter.sendMail(mailOptions, async(error, info) => {
     if (error) {
       console.log(error);
       res.status(500).send('Error sending email');
     } else {
       console.log('Email sent: ' + info.response);
+
+      const updatePayload = {
+        isNotified: true,
+        updatedAt: new Date()
+      }
+      const notifiedUser = await _db(req)('Users').update({ ...updatePayload }, ['id']).where('id', student.id)
+
       return res.status(200).json({
         message: 'Counseling notification sent successfully'
       })

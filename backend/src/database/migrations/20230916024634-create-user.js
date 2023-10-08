@@ -39,7 +39,15 @@ module.exports = {
       answer: {        
         type: Sequelize.ARRAY(Sequelize.INTEGER),
         defaultValue: []
-      },      
+      },
+      isNotified: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+      },
+      isNotificationConfirmed: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+      },
       createdAt: { 
         allowNull: false,
         type: Sequelize.DATE
