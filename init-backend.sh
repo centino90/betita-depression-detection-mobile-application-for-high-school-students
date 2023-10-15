@@ -1,7 +1,7 @@
 #!/bin/sh
 
-docker-compose -f "./backend/docker-compose.yaml" down -v;
-docker-compose -f "./backend/docker-compose.yaml" up --build -d;
+# docker-compose -f "./backend/docker-compose.yaml" down -v;
+# docker-compose -f "./backend/docker-compose.yaml" up --build -d;
 
 cd backend;
 npm install;
