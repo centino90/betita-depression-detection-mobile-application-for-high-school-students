@@ -13,11 +13,10 @@
  - betitaapp@gmail.com
  - _password@123
 
-port 9000
+## init scripts
+- chmod u+x init-backend.sh & ./init-backend.sh
+- chmod u+x init-frontend.sh & ./init-frontend.sh
 
-# .env
+
+### .env
 - edit ./backend/.env
-
-# init scripts
-- chmod u+x init-backend.sh
-- chmod u+x init-frontend.sh
