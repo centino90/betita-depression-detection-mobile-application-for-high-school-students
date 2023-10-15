@@ -17,6 +17,16 @@
 - chmod u+x init-backend.sh & ./init-backend.sh
 - chmod u+x init-frontend.sh & ./init-frontend.sh
 
+## User accounts
+- admin
+ admin@test.com
+ password
+- student
+ student1@test.com
+ password
+
+ stdent2@test.com
+ password
 
 ### .env
 - edit ./backend/.env
