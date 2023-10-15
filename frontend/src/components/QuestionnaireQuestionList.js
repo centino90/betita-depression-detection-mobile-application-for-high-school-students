@@ -31,17 +31,16 @@ const AnswerSectionComponent = ({answer, sendAnswersToParent, index}) => {
 
 const QuestionnaireQuestionList = ({subheader='', iconColor=MD3Colors.secondary40, titleColor=MD3Colors.secondary40, fontWeight = '700', listItems = [], answers = [], sendAnswersToParent}) => {    
     return (
-        <List.Section>            
-            <Text style={{color: iconColor, fontWeight: fontWeight, padding: 0, marginBottom: 2}}>{subheader}</Text>
-            <Text style={{color: titleColor, marginBottom: 30}}>
-                How Often Have You Had These Symptoms Over the Past 2 Weeks, Including Today?
+        <List.Section>                        
+            <Text style={{color: titleColor, marginBottom: 20, marginTop: 10, fontSize: 15}}>
+                How often have you had the following symptoms below over the past 2 weeks, including today?
                 Please give your honest rating to each item in the list
             </Text>
-            <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly', flexWrap: 'wrap', marginBottom: 10}}>
-                <Text>0 - Not at all</Text>
-                <Text>1 - A few days</Text>
-                <Text>2 - More than half the days</Text>                
-                <Text>3 - Almost every day</Text>  
+            <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', flexWrap: 'wrap', marginBottom: 10}}>
+                <Text style={{width: '100%'}}>0 - Not at all</Text>
+                <Text style={{width: '100%'}}>1 - A few days</Text>
+                <Text style={{width: '100%'}}>2 - More than half the days</Text>                
+                <Text style={{width: '100%'}}>3 - Almost every day</Text>  
             </View>
             {listItems.map((item, index) => (
                 <List.Item 

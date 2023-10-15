@@ -10,7 +10,7 @@ const QuestionnaireDetailList = ({subheader='', iconColor=MD3Colors.secondary40,
                     key={item.key}             
                     title={item.value}                    
                     left={() => <List.Icon color={titleColor} icon={item.icon} />}                    
-                    right={() => item?.editLabel ? <Button mode="text" icon="pen" onPress={() => console.log('Pressed')}>edit</Button> : ''}
+                    right={() => item?.editLabel ? <Button mode="text" icon="pen">edit</Button> : ''}
                     titleStyle={{color: titleColor, textTransform: 'lowercase'}}                    
                     titleNumberOfLines={100}
                     description={item?.description ?? ''}

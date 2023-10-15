@@ -39,31 +39,41 @@ const AdminDepressedStudentsPage = () => {
         return <Text>{error}</Text>
     }
 
+    console.log(data)
+
     return (
         <View>
-            <Text variant="titleMedium" style={{ marginBottom: 25, marginTop: 25 }}>Students ranked by depression score</Text>
-            <View style={{ display: 'flex', flexDirection: 'column' }}>
-                {data.data.map((item, index) => (
-                    <View>
-                        <List.Item
-                            key={item.id}
-                            title={item.email}
-                            description={`${item.symptom} | ${item.age} yrs old | ${item.gender}`}
-                            left={props => <Text variant='displaySmall'>{item.totalScore <= 9 ? `0${item.totalScore}` : item.totalScore}</Text>}
-                            right={props => {
-                                if (item.isNotified && !item.isNotificationConfirmed) {
-                                    return (<NotifButton {...props} studentId={item.id} icon={'bell-badge'} refetch={refetch} />)
-                                } else if (item.isNotificationConfirmed && !item.isNotified) {
-                                    return (<IconButton {...props} style={{ margin: 0 }} icon="bell-check" iconColor={MD3Colors.primary50} size={25} />)
-                                } else {
-                                    return (<NotifButton {...props} studentId={item.id} refetch={refetch} />)
-                                }
-                            }}
-                        />
-                        <Divider />
-                    </View>
-                ))}
-            </View>
+            {data.data.length === 0 
+             ? 
+                <Text variant="titleMedium" style={{ marginBottom: 25, marginTop: 25 }}>There are no depressed students at the moment...</Text>
+             :
+              <>
+                <Text variant="titleMedium" style={{ marginBottom: 25, marginTop: 25 }}>Students ranked by depression score</Text>
+                <View style={{ display: 'flex', flexDirection: 'column' }}>
+                    {data.data.map((item, index) => (
+                        <View>
+                            <List.Item
+                                key={item.id}
+                                title={item.email}
+                                description={`${item.symptom} | ${item.age} yrs old | ${item.gender}`}
+                                left={props => <Text variant='displaySmall'>{item.totalScore <= 9 ? `0${item.totalScore}` : item.totalScore}</Text>}
+                                right={props => {
+                                    if (item.isNotified && !item.isNotificationConfirmed) {
+                                        return (<NotifButton {...props} studentId={item.id} icon={'bell-badge'} refetch={refetch} />)
+                                    } else if (item.isNotificationConfirmed && !item.isNotified) {
+                                        return (<IconButton {...props} style={{ margin: 0 }} icon="bell-check" iconColor={MD3Colors.primary50} size={25} />)
+                                    } else {
+                                        return (<NotifButton {...props} studentId={item.id} refetch={refetch} />)
+                                    }
+                                }}
+                            />
+                            <Divider />
+                        </View>
+                    ))}
+                </View>
+              </> 
+            }
+          
         </View>
     )
 }

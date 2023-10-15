@@ -13,8 +13,8 @@ module.exports = {
         isAdmin: false,
         createdAt: new Date(),
         updatedAt: new Date(),
-        answer: [0, 1, 2, 3, 0, 1, 2, 3, 0],
-        symptom: 'moderate'
+        answer: [null, null, null, null, null, null, null, null ,null],
+        symptom: 'none'
       },
       {
         email: 'student2@test.com',
@@ -24,8 +24,8 @@ module.exports = {
         isAdmin: false,
         createdAt: new Date(),
         updatedAt: new Date(),
-        answer: [0, 0, 0, 3, 0, 0, 0, 3, 0],
-        symptom: 'mild'
+        answer: [null, null, null, null, null, null, null, null, null],
+        symptom: 'none'
       },
       {
         email: 'admin@test.com',

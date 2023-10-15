@@ -338,8 +338,10 @@ app.get('/admin/students', async (req, res) => {
     })
   }
 
-  const students = await _db(req).select('id', 'email', 'age', 'gender', 'isAdmin', 'symptom', 'answer', 'isNotified', 'isNotificationConfirmed').from('Users').whereNotNull('symptom').andWhereNot('symptom', 'minimal')
+  const students = await _db(req).select('id', 'email', 'age', 'gender', 'isAdmin', 'symptom', 'answer', 'isNotified', 'isNotificationConfirmed').from('Users').whereNotNull('symptom').andWhereNot('symptom', 'minimal').andWhereNot('symptom', 'none')
+  
   const mappedStudents = students.map(student => {
+    student.answer = student.answer.filter(row => row).map(row => parseInt(row))
     student.totalScore = student?.answer.reduce((acc, cur) => acc + cur, 0)
     return student
   })
@@ -351,13 +353,21 @@ app.get('/admin/students', async (req, res) => {
   })
 });
 app.get('/admin/student/:id', async (req, res) => {
-  if (!req.user?.isAdmin) {
-    return res.status(403).json({
-      error: 'Forbidden'
-    })
+  const student = (await _db(req).select('id', 'email', 'age', 'gender', 'isAdmin', 'symptom', 'answer', 'isNotified', 'isNotificationConfirmed').from('Users').where('id', req.params?.id ?? null))[0]
+  if(student.answer.length < 9) {
+    for (let index = 0; index < 9; index++) {
+      if(!student.answer[index] && parseInt(student.answer[index]) != 0) {
+        student.answer.push(null)
+      }      
+    }
   }
-
-  const student = (await _db(req).select('id', 'email', 'age', 'gender', 'isAdmin', 'symptom', 'answer', 'isNotified').from('Users').where('id', req.params?.id ?? null))[0]
+  student.answer = student.answer.map(row => {
+    if(parseInt(row) >= 0) {
+      return parseInt(row)
+    } else {
+      return row
+    }
+  })
 
   return res.status(200).json({
     message: 'Student Fetching Successful',
@@ -366,10 +376,9 @@ app.get('/admin/student/:id', async (req, res) => {
 });
 app.post('/student/saveAnswer', async (req, res) => {
   const { answer = [] } = req.body
-
   // map answer to PHQ symptom
   let symptom = ''
-  const totalScore = answer.reduce((acc, cur) => acc + cur, 0)
+  const totalScore = answer.filter(row => parseInt(row) >= 0).map(row => parseInt(row)).reduce((acc, cur) => acc + cur, 0)
   if (totalScore === 0 || totalScore <= 4) symptom = 'minimal'
   else if (totalScore === 5 || totalScore <= 9) symptom = 'mild'
   else if (totalScore === 10 || totalScore <= 14) symptom = 'moderate'

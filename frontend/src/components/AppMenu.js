@@ -1,7 +1,8 @@
 import * as React from 'react'
-import { View } from 'react-native'
+import { DevSettings, View } from 'react-native'
 import { Button, Menu } from 'react-native-paper'
 import storage from '../storage'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const AppMenu = ({ isMenuVisible, setMenuVisiblity, navigation }) => {
   const openMenu = () => setMenuVisiblity(true)
@@ -25,7 +26,9 @@ const AppMenu = ({ isMenuVisible, setMenuVisiblity, navigation }) => {
 }
 
 const handleSignOut = (navigation) => {
-  storage.remove({key: 'currentUser', id: 1}).then(res => {    
+  storage.remove({key: 'currentUser', id: 1}).then(async res => {   
+    // DevSettings.reload()
+    await AsyncStorage.clear()     
     navigation.navigate('Login')
   })
   // todo: clear cookie

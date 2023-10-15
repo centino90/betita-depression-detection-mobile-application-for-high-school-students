@@ -3,21 +3,11 @@ import { BackHandler } from 'react-native'
 import AppContainer from '../components/AppContainer'
 import StudentQuestionnairePage from '../components/StudentQuestionnairePage'
 import fetchAvailableQuestionnaireHook from '../hooks/FetchAvailableQuestionnaireHook'
-import {BACKEND_URL} from '@env'
+import { BACKEND_URL } from '@env'
+import { useQuery } from 'react-query'
+import FetchStudentDataHook from '../hooks/FetchStudentDataHook'
 
 const StudentDashboard = ({ navigation }) => {
-  const [questionnaire, setQuestionnaire] = React.useState({})
-  const handleQuestionnaire = (state = {}) => {
-    setQuestionnaire(state)
-  }
-  const memoizedHandleQuestionnaire = React.useCallback(handleQuestionnaire, []);  
-
-  const [questionnaireTemplate, setQuestionnaireTemplate] = React.useState({})
-  const handleQuestionnaireTemplate = (state = {}) => {
-    setQuestionnaireTemplate(state)
-  }
-  const memoizedHandleQuestionnaireTemplate = React.useCallback(handleQuestionnaireTemplate, []);  
-
   const [visibleActionMessage, setVisibleActionMessage] = React.useState(false)
   const handleVisibleActionMessage = (state) => {
     setVisibleActionMessage(state)
@@ -35,14 +25,9 @@ const StudentDashboard = ({ navigation }) => {
       )
     }
   }, [])
-  React.useEffect(() => {
-    fetchAvailableQuestionnaireHook({URL: `${BACKEND_URL}/questionnaires/available`}).then(res => memoizedHandleQuestionnaire(res.body.data))
-    console.log('refetch', questionnaireTemplate)
-  }, [questionnaireTemplate])
-
 
   const HeaderProps = {
-    HeaderTitle: 'Student Dashboard',
+    HeaderTitle: 'PHQ-9 Questionnaire',
     isNestedPage: false
   }
 
@@ -52,7 +37,8 @@ const StudentDashboard = ({ navigation }) => {
   }
 
   const ContentProps = {
-    questionnaire: questionnaire
+    questionnaire: [],
+    visibleActionMessage: visibleActionMessage
   }
 
   const MessageProps = {
@@ -62,14 +48,13 @@ const StudentDashboard = ({ navigation }) => {
   }
 
   return (
-    <AppContainer 
+    <AppContainer
       HeaderProps={HeaderProps}
-      NavigationProps={NavigationProps} 
+      NavigationProps={NavigationProps}
       MessageProps={MessageProps}
-      AppContent={() => <StudentQuestionnairePage  
-        ContentProps={ContentProps} 
-        memoizedHandleQuestionnaireTemplate={memoizedHandleQuestionnaireTemplate} 
-        memoizedHandleVisibleActionMessage={memoizedHandleVisibleActionMessage}
+      AppContent={() => <StudentQuestionnairePage
+        ContentProps={ContentProps}
+        memoizedHandleVisibleActionMessage={memoizedHandleVisibleActionMessage}        
       />}
     />
   )

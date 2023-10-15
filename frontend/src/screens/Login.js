@@ -22,9 +22,6 @@ const Login = ({navigation}) => {
   const [password, setPassword] = React.useState("")
 
   const handleLoginFormSubmit = async (submit) => {
-    console.log({email, password})
-    console.log({BACKEND_URL})
-
     const {body, header} = await attemptLogin({URL: `${BACKEND_URL}/auth`, payload: {email, password}})
     if(body.data) {      
       storage.save({
@@ -37,7 +34,9 @@ const Login = ({navigation}) => {
         }
       })
 
-      console.log('storage', await storage.getAllDataForKey('currentUser'))
+      setEmail("")
+      setPassword("")
+
       if(body.data.isAdmin) {
         navigation.navigate('AdminDashboard')
       } else {
@@ -72,6 +71,7 @@ const Login = ({navigation}) => {
                 value={password}
                 onChangeText={password => setPassword(password)}
                 style={{marginTop: 25}}
+                secureTextEntry={true}
             />
             <Button icon="login" mode="contained" onPress={() => handleLoginFormSubmit()} style={{marginTop: 35}}>
                 Submit

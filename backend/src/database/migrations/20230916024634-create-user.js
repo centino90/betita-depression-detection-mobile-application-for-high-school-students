@@ -34,10 +34,10 @@ module.exports = {
       symptom: {
         allowNull: true,
         type: Sequelize.ENUM,
-        values: ['minimal', 'mild', 'moderate', 'moderately severe', 'severe']
+        values: ['minimal', 'mild', 'moderate', 'moderately severe', 'severe', 'none']
       },
       answer: {        
-        type: Sequelize.ARRAY(Sequelize.INTEGER),
+        type: Sequelize.ARRAY(Sequelize.TEXT),
         defaultValue: []
       },
       isNotified: {

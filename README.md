@@ -2,6 +2,14 @@
 
 # Setup
 
+## Installlation
+- Android Studio
+- Xampp
+- nvm
+- mailtrap https://mailtrap.io/
+ - betitaapp@gmail.com
+ - _password@123
+
 port 9000
 
 # .env

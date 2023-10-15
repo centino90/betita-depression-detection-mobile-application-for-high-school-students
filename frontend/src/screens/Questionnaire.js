@@ -53,7 +53,7 @@ const Questionnaire = ({ navigation, ...props }) => {
           <Divider />
           <View>
             <QuestionnaireQuestionList subheader='Questions' listItems={questions}/>
-            <Button style={{marginTop: 10}} icon="pen-plus" mode="elevated" onPress={() => console.log('Pressed')}>
+            <Button style={{marginTop: 10}} icon="pen-plus" mode="elevated">
               Submit Answer
             </Button>
           </View>
