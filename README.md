@@ -5,6 +5,7 @@
 ## Installlation
 - Android Studio https://redirector.gvt1.com/edgedl/android/studio/install/2022.3.1.20/android-studio-2022.3.1.20-windows.exe
 - postgres https://sbp.enterprisedb.com/getfile.jsp?fileid=1258698
+ - postgres password: password
 - nvm https://github.com/coreybutler/nvm-windows/releases/download/1.1.11/nvm-setup.exe
 
 ## After Installation
